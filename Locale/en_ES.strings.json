@@ -1,0 +1,9 @@
+{
+"Airport_Id" : "Aeropuerto ID",
+"city" : "Ciudad",
+"carrier" : "TRANSPORTADOR",
+"arr_delay" : "Retraso de llegada",
+"dayof_month" : "Dia del mes",
+"home_state" : "Estado natal",
+"other_state" : "Otro Estado"
+}
