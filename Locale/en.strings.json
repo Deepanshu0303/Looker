@@ -1,0 +1,9 @@
+{
+"Airport_Id" : "Airport ID",
+"city" : "CITY",
+"carrier" : "CARRIER",
+"arr_delay" : "Arrival Delay",
+"dayof_month" : "Day Of Month",
+"home_state" : "Home State",
+"other_state" : "Other State"
+}
