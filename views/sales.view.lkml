@@ -380,11 +380,13 @@ dimension: order_line_item {
   }
   measure: total_Sales {
     type: sum
+    value_format_name: usd
     sql: ${order_quantity}*${products.product_price} ;;
   }
 
   measure: total_Cost {
     type: sum
+    value_format_name: usd
     sql: ${order_quantity}*${products.product_cost} ;;
   }
   measure: total_order_quantity {
@@ -428,6 +430,7 @@ dimension: order_line_item {
   }
   measure:profit  {
     type: number
+    value_format_name: usd
     sql: ${total_Sales}-${total_Cost} ;;
   }
   measure: profit_margin {
@@ -437,6 +440,7 @@ dimension: order_line_item {
   }
   measure: sales_per_customer {
     type: number
+    value_format_name: usd
     value_format: "0.000,\" K\""
     sql: ${total_Sales}/${Total_customers} ;;
   }
