@@ -25,10 +25,11 @@ view: new_joiners_2 {
   filter: gender_filter {
     type: string
   }
-  dimension: new_joined_customers {
+  measure: new_joined_customers {
     type: number
     sql: ${TABLE}.New_joined_customers ;;
   }
+
 
   set: detail {
     fields: [new_joined_customers]

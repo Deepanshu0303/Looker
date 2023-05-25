@@ -46,6 +46,17 @@ view: product_subcategory {
     }
   }
 
+  dimension: subcategory_name2 {
+    label: "Subcategory Name"
+    type: string
+    sql: ${TABLE}.SubcategoryName ;;
+    link: {
+      label: "Product wise explore"
+      url: "https://streamvector.cloud.looker.com/dashboards/125?Subcategory+Name={{value}}&Category+Name={{_filters['product_category.category_name'] | url_encode}}"
+
+    }
+  }
+
   measure: count {
     type: count
     drill_fields: [subcategory_name]

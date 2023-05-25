@@ -20,6 +20,16 @@ view: product_category {
 
     }
   }
+  dimension: category_name2 {
+    label: "Category Name"
+    type: string
+    sql: ${TABLE}.CategoryName ;;
+    link: {
+      label: "Subcategory wise explore"
+      url: "https://streamvector.cloud.looker.com/dashboards/124?Select+KPI=total%5E_Sales&Category+Name={{value}}"
+
+    }
+  }
 
   dimension: product_category_key {
     primary_key: yes

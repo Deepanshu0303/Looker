@@ -11,6 +11,7 @@ view: sales {
   # A dimension is a groupable field that can be used to filter query results.
   # This dimension will be called "Customer Key" in Explore.
 
+
   dimension: customer_key {
     type: number
     sql: ${TABLE}.CustomerKey ;;
@@ -52,6 +53,11 @@ view: sales {
     datatype: date
     sql: ${TABLE}.OrderDate ;;
   }
+  dimension: month_year {
+    type:string
+    sql: FORMAT_TIMESTAMP('%b-%Y', ${order_date}) ;;
+  }
+
   dimension_group: current_timestamp {
     hidden: yes
     type: time
@@ -380,11 +386,20 @@ dimension: order_line_item {
   }
   measure: total_Sales {
     type: sum
+    value_format: "$0.00,,\" M\""
     sql: ${order_quantity}*${products.product_price} ;;
+  }
+  #"$#,##0.00"
+  measure: total_Sales2 {
+    type: sum
+    value_format: "$#,##0.00"
+    sql: ${order_quantity}*${products.product_price} ;;
+    html: {{ rendered_value }} | CustomerKey: {{customer_key._rendered_value }}   ;;
   }
 
   measure: total_Cost {
     type: sum
+    value_format: "$0.00,,\" M\""
     sql: ${order_quantity}*${products.product_cost} ;;
   }
   measure: total_order_quantity {
@@ -400,6 +415,26 @@ dimension: order_line_item {
     type: count_distinct
     sql: ${customer_key};;
   }
+
+
+  measure: total_male_customers {
+    type: count_distinct
+    filters: {
+      field: customers.gender
+      value: "M"
+    }
+    sql: ${customer_key} ;;
+  }
+  measure: total_female_customers {
+    type: count_distinct
+    filters: {
+      field: customers.gender
+      value: "F"
+    }
+    sql: ${customer_key} ;;
+  }
+
+
   measure: Average_Order_Per_Customer {
     type: number
     sql: ${count}/${Total_customers};;
@@ -428,22 +463,23 @@ dimension: order_line_item {
   }
   measure:profit  {
     type: number
+    value_format: "$#,##0.00"
     sql: ${total_Sales}-${total_Cost} ;;
   }
   measure: profit_margin {
     type: number
-    #value_format: "0\%"
+    value_format: "0.00%"
     sql: ${profit}/${total_Sales} ;;
   }
   measure: sales_per_customer {
     type: number
-    value_format: "0.000,\" K\""
+    value_format: "$0.000,\" K\""
     sql: ${total_Sales}/${Total_customers} ;;
   }
 
   measure:average_order_value  {
     type: number
-    value_format: "0.000,\" K\""
+    value_format: "$0.000,\" K\""
     sql: ${total_Sales}/${total_order_quantity} ;;
   }
   parameter: Select_KPI {
@@ -506,48 +542,116 @@ dimension: order_line_item {
     {% else %}
       ${average_order_value}
     {% endif %};;
+    html:
+    {% if Select_KPI._parameter_value == 'total_Sales' %}
+     ${{ rendered_value | remove: ',' | round: 2 | number_with_delimiter: ','}}
+    {% elsif Select_KPI._parameter_value == 'profit'%}
+     ${{ rendered_value | remove: ',' | round: 2 | number_with_delimiter: ','}}
+    {% elsif Select_KPI._parameter_value == 'profit_margin'%}
+     {{ rendered_value | times: 100 | round: 2}}%
+    {% elsif Select_KPI._parameter_value == 'sales_per_customer' %}
+     ${{ rendered_value | remove: ',' | round: 2 | number_with_delimiter: ','}}
+    {% elsif Select_KPI._parameter_value == 'cost' %}
+     ${{ rendered_value | remove: ',' | round: 2 | number_with_delimiter: ','}}
+    {% else %}
+     ${{ rendered_value | remove: ',' | round: 2 | number_with_delimiter: ','}}
+
+    {% endif %}
+    ;;
   }
+
+
   dimension: title {
     type: string
     sql: CONCAT(INITCAP("{% parameter parameters.select_timeframe %}")," ","vs"," ",INITCAP("{% parameter Select_KPI %}")) ;;
-    html: <h3>{{rendered_value}}</h3> ;;
+    html:<div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+    <h3>{{rendered_value}}</h3> ;;
   }
 
   dimension: title_prod {
     type: string
     sql: INITCAP("{% parameter Select_KPI %}") ;;
-    html: <h3>Top 3 Product by {{rendered_value}}</h3> ;;
+    html:<div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+    <h3>Top 3 Product by {{rendered_value}}</h3>
+    </div>;;
   }
   dimension: period_over_period {
     type: string
     sql:INITCAP("{% parameter Select_KPI %}");;
-    html: <h3>Period over Period analysis by {{rendered_value}} </h3> ;;
+    html:  <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+    <h3>Period over Period analysis by {{rendered_value}} </h3>
+    </div> ;;
   }
 
   dimension: title_sub {
     type: string
     sql: INITCAP("{% parameter Select_KPI %}") ;;
-    html: <h3>Top 3 Subcategory by {{rendered_value}}</h3> ;;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+  <h3>Top 3 Subcategory by {{rendered_value}}</h3>
+</div> ;;
+# html:#95abc4 <h3>Top 3 Subcategory by {{rendered_value}}</h3>;;
   }
   dimension: title_cate {
     type: string
     sql: INITCAP("{% parameter Select_KPI %}") ;;
-    html: <h3>Top 3 Category by {{rendered_value}}</h3> ;;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+    <h3>Top 3 Category by {{rendered_value}}</h3>
+    </div>;;
   }
 
   dimension: title_cat_analysis {
     type: string
     sql: INITCAP("{% parameter Select_KPI %}") ;;
-    html: <h3> {{rendered_value}} by Category</h3> ;;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+    <h3> {{rendered_value}} by Category</h3>
+    </div>;;
   }
 
   dimension: title_subcat_analysis {
     type: string
     sql: INITCAP("{% parameter Select_KPI %}") ;;
-    html: <h3> {{rendered_value}} by Subcategory</h3> ;;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+    <h3> {{rendered_value}} by Subcategory</h3>
+    </div>;;
   }
   measure: count {
     type: count
     drill_fields: []
   }
+  dimension: Button {
+    type: string
+    sql: "Button" ;;
+    html:<a href=javascript:history.back() class="button">Back</a>;;
+
+   }
+  dimension: Help {
+    type: string
+    sql: "Help" ;;
+    description: "Help And Support"
+    html:<img src="https://previews.123rf.com/images/artc/artc1610/artc161000003/64462119-operator-customer-service-and-support-icon-thin-line-in-black-color-with-shadow.jpg" height="100" width="100" title="For help contact:dsaxena@gmail.com">
+
+    ;;
   }
+  dimension: info_1{
+    type: string
+    sql: "Info" ;;
+    description: "Info"
+    html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="50" width="50" title="Select KPI and Select Timeframe filter is only applicable here">
+        ;;
+  }
+  dimension: info_2{
+    type: string
+    sql: "Info" ;;
+    description: "Info"
+    html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="50" width="50" title="All the filters are applicable here">
+      ;;
+  }
+  dimension: info_3{
+    type: string
+    sql: "Info" ;;
+    description: "Info"
+    html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="50" width="50" title="Only Select KPI is applicable here">
+      ;;
+  }
+
+ }

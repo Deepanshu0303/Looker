@@ -47,7 +47,25 @@ view: customers {
     datatype: date
     sql: ${TABLE}.BirthDate ;;
   }
-
+  dimension: Age {
+    type: number
+    sql: DATE_DIFF(DATE_TRUNC(DATE({% parameter parameters.select_reference_date %}), YEAR), DATE(${birth_date}), YEAR)
+;;
+  }
+  dimension: Age_tier {
+    type: tier
+    tiers: [30,40,50,60,70,80,90,100,110 ]
+    style: integer
+    sql: ${Age} ;;
+  }
+  dimension: Annual_Income_tier {
+    type: tier
+    tiers: [10000,20000,30000,40000,50000,60000,70000,80000,90000,100000,110000,120000,130000,140000,150000,160000,170000,180000 ]
+    style: integer
+    value_format: "$#,##0,\" K\""
+    sql: ${annual_income} ;;
+  }
+#"$#,##0.00,\" K\""
   dimension: customer_key {
     primary_key: yes
     type: number
@@ -57,6 +75,7 @@ view: customers {
     type: count_distinct
     sql: ${customer_key};;
   }
+
 
 
   dimension: education_level {

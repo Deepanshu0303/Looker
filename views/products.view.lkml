@@ -76,7 +76,17 @@ view: products {
     sql: ${TABLE}.ProductName ;;
     link: {
       label: "Explore by Product Name"
-      url:"https://streamvector.cloud.looker.com/dashboards/126?Product+Name={{value}}"
+      url:"https://streamvector.cloud.looker.com/dashboards/126?Product+Name={{value | replace: ',', '^,' | url_encode}}"
+    }
+  }
+
+  dimension: product_name2 {
+    label: "Product Name"
+    type: string
+    sql: ${TABLE}.ProductName ;;
+    link: {
+      label: "Explore by Product Name"
+      url:"https://streamvector.cloud.looker.com/dashboards/126?Product+Name={{value | replace: ',', '^,' | url_encode}}"
     }
   }
 

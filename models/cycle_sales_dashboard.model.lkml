@@ -35,13 +35,12 @@ explore: sales {
   {% if sales.current_vs_previous_period_bigquery._in_query %} ${current_vs_previous_period_bigquery} is not null {% else %} 1=1 {% endif %}
   and
   {% if sales.current_vs_previous_period_bigquery3._in_query %} ${current_vs_previous_period_bigquery3} is not null {% else %} 1=1 {% endif %}
-  AND
-  {% if parameters.apply_to_date_filter._is_filtered %} ${sales.is_to_date2}  {% else %} 1=1 {% endif %}
   and
    {% if parameters.apply_to_date_filter._is_filtered %} ${sales.is_to_date3}  {% else %} 1=1 {% endif %}
 ;;
 
-
+#AND
+ # {% if parameters.apply_to_date_filter._is_filtered %} ${sales.is_to_date2}  {% else %} 1=1 {% endif %}
 
 
   join: customers {
@@ -100,6 +99,12 @@ explore: sales {
     sql_on: ${returns.product_key}=${products.product_key} ;;
   }
 
+join: top5_customers {
+  type: left_outer
+  relationship: many_to_one
+  sql_on: ${sales.customer_key}=${top5_customers.customer_key} ;;
+}
+
   join: parameters {}
 
 }
@@ -142,3 +147,6 @@ explore: returns {
   }
   explore: new_joiners_2 {}
   explore: new_customers_each_month {}
+  explore: each_month_new_customers2 {}
+  explore: distribution_customer {}
+  explore: new_joiners3 {}
