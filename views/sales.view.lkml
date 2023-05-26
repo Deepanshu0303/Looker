@@ -563,21 +563,21 @@ dimension: order_line_item {
 
   dimension: title {
     type: string
-    sql: CONCAT(INITCAP("{% parameter parameters.select_timeframe %}")," ","vs"," ",INITCAP("{% parameter Select_KPI %}")) ;;
+    sql: CONCAT(INITCAP("{% parameter parameters.select_timeframe %}")," ","vs"," ",INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' '))) ;;
     html:<div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
     <h3>{{rendered_value}}</h3> ;;
   }
 
   dimension: title_prod {
     type: string
-    sql: INITCAP("{% parameter Select_KPI %}") ;;
+    sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
     html:<div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
     <h3>Top 3 Product by {{rendered_value}}</h3>
     </div>;;
   }
   dimension: period_over_period {
     type: string
-    sql:INITCAP("{% parameter Select_KPI %}");;
+    sql:INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' '));;
     html:  <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
     <h3>Period over Period analysis by {{rendered_value}} </h3>
     </div> ;;
@@ -585,7 +585,7 @@ dimension: order_line_item {
 
   dimension: title_sub {
     type: string
-    sql: INITCAP("{% parameter Select_KPI %}") ;;
+    sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
     html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
   <h3>Top 3 Subcategory by {{rendered_value}}</h3>
 </div> ;;
@@ -593,7 +593,7 @@ dimension: order_line_item {
   }
   dimension: title_cate {
     type: string
-    sql: INITCAP("{% parameter Select_KPI %}") ;;
+    sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
     html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
     <h3>Top 3 Category by {{rendered_value}}</h3>
     </div>;;
@@ -601,7 +601,7 @@ dimension: order_line_item {
 
   dimension: title_cat_analysis {
     type: string
-    sql: INITCAP("{% parameter Select_KPI %}") ;;
+    sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
     html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
     <h3> {{rendered_value}} by Category</h3>
     </div>;;
@@ -609,7 +609,7 @@ dimension: order_line_item {
 
   dimension: title_subcat_analysis {
     type: string
-    sql: INITCAP("{% parameter Select_KPI %}") ;;
+    sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
     html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
     <h3> {{rendered_value}} by Subcategory</h3>
     </div>;;
@@ -628,7 +628,7 @@ dimension: order_line_item {
     type: string
     sql: "Help" ;;
     description: "Help And Support"
-    html:<img src="https://previews.123rf.com/images/artc/artc1610/artc161000003/64462119-operator-customer-service-and-support-icon-thin-line-in-black-color-with-shadow.jpg" height="100" width="100" title="For help contact:dsaxena@gmail.com">
+    html:<img src="https://previews.123rf.com/images/artc/artc1610/artc161000003/64462119-operator-customer-service-and-support-icon-thin-line-in-black-color-with-shadow.jpg" height="80" width="80" title="For help contact:dsaxena@gmail.com">
 
     ;;
   }
@@ -636,22 +636,23 @@ dimension: order_line_item {
     type: string
     sql: "Info" ;;
     description: "Info"
-    html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="50" width="50" title="Select KPI and Select Timeframe filter is only applicable here">
+    html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="40" width="50" title="Select KPI and Select Timeframe filter is only applicable here">
         ;;
   }
   dimension: info_2{
     type: string
     sql: "Info" ;;
     description: "Info"
-    html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="50" width="50" title="All the filters are applicable here">
+    html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="40" width="50" title="All the filters are applicable here">
       ;;
   }
   dimension: info_3{
     type: string
     sql: "Info" ;;
     description: "Info"
-    html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="50" width="50" title="Only Select KPI is applicable here">
+    html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="40" width="50" title="Only Select KPI is applicable here">
       ;;
   }
+
 
  }
