@@ -2,7 +2,7 @@
 view: sales {
   # The sql_table_name parameter indicates the underlying database table
   # to be used for all fields in this view.
-  sql_table_name: `Sales_dataset.Sales`
+  sql_table_name: `my-first-project-2023-376710.Sales_dataset.Sales`
     ;;
   # No primary key is defined for this view. In order to join this view in an Explore,
   # define primary_key: yes on a dimension that has no repeated values.
@@ -204,7 +204,7 @@ view: sales {
     {% elsif parameters.select_timeframe._parameter_value == 'year' %}
       ${order_year}
     {% elsif parameters.select_timeframe._parameter_value == 'quarter' %}
-      ${order_quarter}
+       ${order_quarter}
     {% else %}
       ${order_month}
     {% endif %}
@@ -251,12 +251,13 @@ view: sales {
       {% elsif parameters.select_timeframe._parameter_value == 'year' %}
         ${order_month_name}
       {% elsif parameters.select_timeframe._parameter_value == 'quarter' %}
-        ${order_month_num}
+        ${order_month_name}
       {% else %}
         ${order_day_of_month}
       {% endif %}
     ;;
   }
+  #${order_month_num}
   dimension: selected_reference_date_default_today_bigquery {
     description: "This Dimension will make sure that when \"Select Reference date\" is set in  the future then we use the current day for reference"
     type: date_raw
@@ -308,20 +309,23 @@ view: sales {
       {% assign current_quarter = current_month | divided_by: 3.0 | ceil %}
       {% assign reference_quarter = reference_month | divided_by: 3.0 | ceil %}
         {% if reference_year >= current_year and reference_quarter >= current_quarter %}
-         'Month of {{ current_label }} (Q{{ current_quarter }}-{{ current_year }})'
-        {% else %}'Month of {{ reference_label }} (Q{{ reference_quarter }}-{{ reference_year }})'
+         'Months of {{ current_label }} (Q{{ current_quarter }}-{{ current_year }})'
+        {% else %}'Months of {{ reference_label }} (Q{{ reference_quarter }}-{{ reference_year }})'
         {% endif %}
     {% elsif parameters.select_timeframe._parameter_value == 'year' %}
       {% assign current = current | date: "%Y" %}
       {% assign reference = reference | date: "%Y" %}
         {% if reference >= current %}
-        'Month of {{ current_label }} ({{ current }})'
-        {% else %} 'Month of {{ reference_label }} ({{ reference }})'
+        'Months of {{ current_label }} ({{ current }})'
+        {% else %} 'Months of {{ reference_label }} ({{ reference }})'
         {% endif %}
     {% else %} 'error in parameters.dynamic_labels_in_liquid [{{ current_label }} ({{ current }}) / {{ reference_label }} ({{ reference }})]'
     {% endif %}
   ;;
   }
+
+#{% assign reference = parameters.select_reference_date._parameter_value | remove: "TIMESTAMP('" | remove: "')" | remove : " 00:00:00" | append : " 00:00:00" %}
+
 
 
 
@@ -370,6 +374,7 @@ view: sales {
 
 
 
+
 dimension: order_line_item {
     type: number
     sql: ${TABLE}.OrderLineItem ;;
@@ -386,16 +391,19 @@ dimension: order_line_item {
   }
   measure: total_Sales {
     type: sum
-    value_format: "$0.00,,\" M\""
+    value_format: "$0.0,,\" M\""
     sql: ${order_quantity}*${products.product_price} ;;
   }
   #"$#,##0.00"
   measure: total_Sales2 {
     type: sum
-    value_format: "$#,##0.00"
+    value_format: "0.00,\" K\""
     sql: ${order_quantity}*${products.product_price} ;;
-    html: {{ rendered_value }} | CustomerKey: {{customer_key._rendered_value }}   ;;
-  }
+    html: {{rendered_value }} | Customer Key: {{customer_key._rendered_value }} ;;
+#"$#,##0"
+  }#Customer Name: {{ customers.first_name._rendered_value }} {{ customers.last_name._rendered_value }} ;;
+  #html: {{ rendered_value }} | Customer Name: {{ customers.first_name._rendered_value | concat: ' ' | append: customers.last_name._rendered_value }}   ;;
+#{{ rendered_value }} | CustomerKey: {{customer_key._rendered_value }}
 
   measure: total_Cost {
     type: sum
@@ -479,7 +487,7 @@ dimension: order_line_item {
 
   measure:average_order_value  {
     type: number
-    value_format: "$0.000,\" K\""
+    value_format: "$0.00,\" K\""
     sql: ${total_Sales}/${total_order_quantity} ;;
   }
   parameter: Select_KPI {
@@ -546,7 +554,7 @@ dimension: order_line_item {
     {% if Select_KPI._parameter_value == 'total_Sales' %}
      ${{ rendered_value | remove: ',' | round: 2 | number_with_delimiter: ','}}
     {% elsif Select_KPI._parameter_value == 'profit'%}
-     ${{ rendered_value | remove: ',' | round: 2 | number_with_delimiter: ','}}
+     ${{ rendered_value | remove: ','| round: 2 | number_with_delimiter: ','}}
     {% elsif Select_KPI._parameter_value == 'profit_margin'%}
      {{ rendered_value | times: 100 | round: 2}}%
     {% elsif Select_KPI._parameter_value == 'sales_per_customer' %}
@@ -559,61 +567,131 @@ dimension: order_line_item {
     {% endif %}
     ;;
   }
-
-
+# ${{ rendered_value | remove: ',' | round: 2 | number_with_delimiter: ','}}
+# remove: ',' | round: 2 | number_with_delimiter|number_to_currency}}
   dimension: title {
     type: string
     sql: CONCAT(INITCAP("{% parameter parameters.select_timeframe %}")," ","vs"," ",INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' '))) ;;
-    html:<div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
-    <h3>{{rendered_value}}</h3> ;;
+    html:<div style="background-color:#adc3db;">
+          <h2 style="display: inline-block;vertical-align: middle;">{{rendered_value}}</h2>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title="Select KPI and Select Timeframe filter is only applicable here" />
+      </div> ;;
+  }
+  dimension: Sales_Distribution_by_Continent{
+    type: string
+    sql:INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' '));;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+          <h2> {{rendered_value}} Distribution by Continent</h2>
+          </div>;;
   }
 
   dimension: title_prod {
     type: string
     sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
-    html:<div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
-    <h3>Top 3 Product by {{rendered_value}}</h3>
-    </div>;;
-  }
+    html:<div style="background-color:#adc3db;">
+          <h3 style="display: inline-block;vertical-align: middle;">Top 3 Product by {{rendered_value}}</h3>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title="Only Select KPI is applicable here" />
+      </div>
+    ;;}
+
   dimension: period_over_period {
     type: string
     sql:INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' '));;
-    html:  <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
-    <h3>Period over Period analysis by {{rendered_value}} </h3>
-    </div> ;;
+    html: <div style="background-color:#adc3db;">
+          <h2 style="display: inline-block;vertical-align: middle;">Period over Period analysis by {{rendered_value}}</h2>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title="All the filters are applicable here" />
+      </div> ;;
   }
 
   dimension: title_sub {
     type: string
     sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
-    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
-  <h3>Top 3 Subcategory by {{rendered_value}}</h3>
-</div> ;;
+    html: <div style="background-color:#adc3db;">
+          <h3 style="display: inline-block;vertical-align: middle;">Top 3 Subcategory by {{rendered_value}}</h3>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title="Only Select KPI is applicable here" />
+      </div>;;
 # html:#95abc4 <h3>Top 3 Subcategory by {{rendered_value}}</h3>;;
   }
   dimension: title_cate {
     type: string
     sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
-    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
-    <h3>Top 3 Category by {{rendered_value}}</h3>
-    </div>;;
+    html: <div style="background-color:#adc3db;">
+          <h3 style="display: inline-block;vertical-align: middle;">Top 3 Category by {{rendered_value}}</h3>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title="Only Select KPI is applicable here" />
+      </div>;;
   }
 
   dimension: title_cat_analysis {
     type: string
     sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
-    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
-    <h3> {{rendered_value}} by Category</h3>
-    </div>;;
-  }
+    html: <div style="background-color:#adc3db;">
+          <h2 style="display: inline-block;vertical-align: middle;">{{rendered_value}} by Category</h2>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title="Select KPI is applicable here" />
+      </div>;;
+    }
 
   dimension: title_subcat_analysis {
     type: string
     sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
-    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
-    <h3> {{rendered_value}} by Subcategory</h3>
-    </div>;;
+    html: <div style="background-color:#adc3db;">
+          <h2 style="display: inline-block;vertical-align: middle;">{{rendered_value}} by Subcategory</h2>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title="Select KPI is applicable here" />
+      </div>;;
   }
+
+  dimension: title_sub_prod {
+    type: string
+    sql: INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' ')) ;;
+    html: <div style="background-color:#adc3db;">
+          <h2 style="display: inline-block;vertical-align: middle;">{{rendered_value}} by Subcategory</h2>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title="Select KPI is applicable here" />
+      </div>;;
+  }
+
+  dimension: detail_table_sub {
+    type: string
+    sql: "Detail Table for Subcategory" ;;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+          <h2> {{rendered_value}}</h2>
+          </div>;;
+  }
+  dimension: detail_table_prod_analysis {
+    type: string
+    sql: "Detail Table for Product" ;;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+          <h2> {{rendered_value}}</h2>
+          </div>;;
+  }
+
+  dimension: Detail_table_product {
+    type: string
+    sql: "Detail Table for Product" ;;
+    html: <div style="background-color:#adc3db;">
+          <h2 style="display: inline-block;vertical-align: middle;">{{rendered_value}}</h2>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title=" 'Product Name' filter is applicable here " />
+      </div>;;
+  }
+  dimension: Title_Product_dash {
+    type: string
+    sql: "Quarterly Sales" ;;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+          <h2> {{rendered_value}}</h2>
+          </div>;;
+  }
+  dimension: Title_Product_dash2 {
+    type: string
+    sql: "Quarterly Profit" ;;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+          <h2> {{rendered_value}}</h2>
+          </div>;;
+  }
+  dimension: Title_Product_dash3 {
+    type: string
+    sql: "Monthly Returns" ;;
+    html: <div style="background-color: #adc3db; padding: 10px; margin: 0;line-height: 1;">
+    <h2> {{rendered_value}}</h2>;;
+    }
+
   measure: count {
     type: count
     drill_fields: []
@@ -652,6 +730,57 @@ dimension: order_line_item {
     description: "Info"
     html:<img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="40" width="50" title="Only Select KPI is applicable here">
       ;;
+  }
+  dimension: title42 {
+    type: string
+    sql: CONCAT(INITCAP("{% parameter parameters.select_timeframe %}")," ","vs"," ",INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' '))) ;;
+    html:<div style="background-color: #adc3db; padding: 5px; line-height: .1; display: flex; align-items: center; justify-content: center;vertical-align: middle;position: relative;">
+    <h2 style="margin:0px">{{rendered_value}}</h2>
+    <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" style="position:absolute;top:5px;right:0px;" height="20" width="30" title="Select KPI and Select Timeframe filter is only applicable here" />
+</div>
+;;}
+
+  dimension: title10 {
+    type: string
+    sql: CONCAT(INITCAP("{% parameter parameters.select_timeframe %}")," ","vs"," ",INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' '))) ;;
+    html:<div style="background-color:#adc3db;">
+          <h2 style="display: inline-block;vertical-align: middle;">{{rendered_value}}</h2>
+          <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" style="display:inline-block;width: auto;height: 20px;border-radius: 20px;" title="Select KPI and Select Timeframe filter is only applicable here" />
+      </div>
+      ;;}
+  dimension: title46 {
+    type: string
+    sql: CONCAT(INITCAP("{% parameter parameters.select_timeframe %}")," ","vs"," ",INITCAP(REGEXP_REPLACE("{% parameter Select_KPI %}",'_',' '))) ;;
+    html:  <style>
+  .container {
+    background-color: #adc3db;
+    padding: 5px;
+    margin: 0;
+    line-height: .1;
+    display: flex;
+    align-items: center;
+  }
+
+  .text {
+    flex: 1;
+    text-align: center;
+  }
+
+  .image {
+    margin-left: 10px;
+  }
+</style>
+
+<div class="container">
+  <div class="text">
+    <h3>{{rendered_value}}</h3>
+  </div>
+  <div class="image">
+    <img src="https://img.freepik.com/free-icon/info-logo-circle_318-947.jpg?w=1380&t=st=1685014855~exp=1685015455~hmac=ab7ca0e5424d489b87f9027f4529ed7d8443474ae5f5e2bc4d4933c42cd53d89" height="20" width="30" title="Select KPI and Select Timeframe filter is only applicable here">
+  </div>
+</div>
+
+;;
   }
 
 

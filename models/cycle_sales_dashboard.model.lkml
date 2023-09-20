@@ -105,7 +105,9 @@ join: top5_customers {
   sql_on: ${sales.customer_key}=${top5_customers.customer_key} ;;
 }
 
+
   join: parameters {}
+  join: customer_analysis_titles{}
 
 }
 explore: returns {
@@ -150,3 +152,4 @@ explore: returns {
   explore: each_month_new_customers2 {}
   explore: distribution_customer {}
   explore: new_joiners3 {}
+  explore: new_customer_each_month_trend {}

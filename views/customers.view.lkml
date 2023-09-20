@@ -127,7 +127,16 @@ view: customers {
     type: number
     sql: ${TABLE}.TotalChildren ;;
   }
+  measure: total_Sales3 {
+    type: sum
+    value_format: "$#,##0.00"
+    sql: ${sales.order_quantity}*${products.product_price} ;;
 
+
+  }
+  #html: {{ rendered_value }} | Customer Name: {{ customers.first_name._rendered_value | concat: ' ' | append: customers.last_name._rendered_value }}   ;;
+#{{ rendered_value }} | CustomerKey: {{customer_key._rendered_value }}
+# html: { rendered_value }} | Customer_Name: {{ first_name._rendered_value | concat: ' ' | append: last_name._rendered_value }}   ;;
   measure: count {
     type: count
     drill_fields: [first_name, last_name]

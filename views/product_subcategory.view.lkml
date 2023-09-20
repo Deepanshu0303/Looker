@@ -2,7 +2,7 @@
 view: product_subcategory {
   # The sql_table_name parameter indicates the underlying database table
   # to be used for all fields in this view.
-  sql_table_name: `Sales_dataset.Product subcategory`
+  sql_table_name: `Sales_dataset.product_subcategory`
     ;;
   # No primary key is defined for this view. In order to join this view in an Explore,
   # define primary_key: yes on a dimension that has no repeated values.

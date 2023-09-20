@@ -30,7 +30,7 @@ view: parameters {
     hidden: yes
     type: string
     sql: {% if select_timeframe._parameter_value == 'year' %}
-              "Month of"
+              "Months of"
          {% elsif select_timeframe._parameter_value == 'quarter' %}
               "Month of"
          {% elsif select_timeframe._parameter_value == 'month' %}
